@@ -1,0 +1,33 @@
+#!/bin/bash
+
+# Set the screen title to potentially shortened pwd.
+# This isn't in ~/.bashrc for now as it borks prompts not in screens.
+
+# "<esc>k<esc>\" escape sequence for setting screen titles.  (Null
+# title caused screen to use running command name as title).
+
+set -e
+
+#AGENT_DATA_FILE="$HOME/.ssh-agent_data"
+
+if [ -f $AGENT_DATA_FILE ]; then
+    # leopard now manages ssh-agent
+#    . $AGENT_DATA_FILE
+#    echo -e "Sourcing ssh-agent data in: $AGENT_DATA_FILE...\n"
+    ssh-add -l
+    echo ''
+    sleep 2
+    clear
+
+    export PROMPT_COMMAND='echo -ne "\033k$(pwd | shorten_path.pl)\033\\"'
+
+    if [ $@ ]; then
+	exec screen -c ~/.screenrc.$@
+    else
+	exec screen
+    fi
+
+else
+#    echo "Could not source: $AGENT_DATA_FILE, not starting screen."
+    echo "Could not locate the ssh-agent, not starting screen."
+fi

@@ -1,0 +1,2 @@
+#!/bin/bash
+head -1 | perl -pe 's/\s*$//' | qrencode -o - | feh -

@@ -1,0 +1,11 @@
+#!/usr/bin/perl
+
+my $cals = $ARGV[0];
+
+die "Please supply an integers of calories\n"
+    unless $cals =~ /^\d+/;
+
+printf "%d calories (40/40/20) is:\n", $cals;
+printf "F: %d g.\n", ($cals * .4) / 9;
+printf "C: %d g.\n", ($cals * .4) / 4;
+printf "P: %d g.\n", ($cals * .2) / 4;

@@ -1,0 +1,116 @@
+#!/usr/bin/perl
+
+# Basic pomodoro timer, this time in Perl.
+
+# Assumes play(1) is in your path.  Supply your own audio file.
+
+use warnings;
+use strict;
+
+use File::Basename;
+
+$|++;
+
+my $TONE = "/usr/share/sounds/purple/receive.wav";
+my $REPEAT = 3;
+
+my $STATUS_FILE = "$ENV{HOME}/.pomodoro_status";
+
+my $MIN = $ARGV[0] || 15;  # 25 is the official Pomodoro unit
+my $SEC = $MIN * 60;
+# 5 is better for a tone
+my $MAX_ALERTS = 1;
+
+my $RED = "\e[31m";
+my $GREEN = "\e[32m";
+my $RESET = "\e[00m";
+
+my $tomato = "$GREEN
+                   ,
+                  /.\\
+                 //_`\\
+            _.-`| \\ ``._
+$RED        .-\'\'$GREEN`-.       _.\'$RED`.
+      .\'    $GREEN  / /\'\\/`.\\ $RED   `.
+     /   .   $GREEN |/ $RED        `.  \\
+    \'   /                  \\  ;
+   :   \'            \\       : :
+   ;  ;             ;      /  .
+    \' :             .     \'  /
+     \\ \\           /       .\'
+      `.`        .\'      .\'
+        `-..___....----`
+$RESET\n";
+
+
+$SIG{'INT'} = sub { unlink $STATUS_FILE; exit; };
+
+print "$tomato\n";
+#print scalar localtime() . ': playing ' . basename $TONE . " in $MIN min\n";
+print scalar localtime() . ": alerting with popup in $MIN min\n";
+
+# our timer
+for (my $i=0; $i <= $SEC; $i++) {
+    # periodic updates are nice... every five minutes seems good
+    if (($i % (5 * 60)) == 0) {
+        printf ("%s: %d minutes have elapsed\n", scalar localtime(), $i / 60);
+    }
+
+    # write out remaining minutes status file
+    if (($SEC - $i) % 60 == 0) {
+        open my $fh, "> $STATUS_FILE"
+            or die "cannot open $STATUS_FILE for write: $!\n";
+        my $remaining_minutes = sprintf "%d", ($SEC - $i) / 60;
+        print $fh "$remaining_minutes\n";
+        close $fh;
+    }
+
+    sleep 1;
+}
+
+# ring the alarm
+for (my $i=0; $i < $MAX_ALERTS; $i++) {
+    print scalar localtime() . ": timer has elapsed, alerting...\n";
+    # unless (system("play -q -t wav $TONE") == 0) {
+    #     die "couldn't fork for play: $!\n";
+    # }
+    # sleep $REPEAT;
+
+    # unless (system("xmessage -center -file ~/.bin/pomodoro_tomato.txt") == 0) {
+    #     die "couldn't fork for alert: $!\n";
+
+    if (fork()) {
+	if (system("xcowsay --time=0 --font \"Monospace Sans Bold 72\" --cow-size=large \"TIME IS UP 🍅\"") == 0) {
+	} else {
+	    die "couldn't fork for xcowsay: $!\n";
+	}
+    } else {
+	# child
+	my $i = 0;
+	my @win_ids = get_win_ids("Xcowsay");
+	while ($i < 1000 && @win_ids < 3) {
+	    sleep 0.01;
+	    @win_ids = get_win_ids("Xcowsay");
+	    $i++;
+	}
+
+	if (@win_ids > 0) {
+	    foreach my $win_id (@win_ids) {
+		chomp $win_id;
+		unless (system("compton-trans -w $win_id 99") == 0) {
+		    die "couldn't fork for compton-trans: $!\n";
+		}
+	    }
+	}
+	
+	exit 0;
+    }
+}
+
+unlink $STATUS_FILE;
+exit 0;
+
+sub get_win_ids {
+    my $str = shift;
+    return qx{xwininfo -root -tree | grep $str | awk '{print \$1}'};
+}

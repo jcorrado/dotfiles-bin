@@ -6,7 +6,7 @@
 use warnings;
 use strict;
 
-my $max_len = $ARGV[0] || 15;
+my $max_len = $ARGV[0] || 20;
 my $line = <STDIN>;
 $line =~ s!$ENV{HOME}!~!;
 

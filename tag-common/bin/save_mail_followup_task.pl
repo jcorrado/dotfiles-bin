@@ -10,8 +10,8 @@ use Getopt::Std;
 # and a string of tags
 
 my %CATEGORIES = (
-    personal => { template => 'm', tags =>  '' },
-    birchbox => { template => 'n', tags =>  '' });
+    personal => { template => 'mp', tags =>  '' },
+    birchbox => { template => 'mb', tags =>  '' });
 
 our ($opt_c);
 getopts ('c:');

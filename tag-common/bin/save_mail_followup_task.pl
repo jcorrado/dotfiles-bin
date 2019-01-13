@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-# Create an org-mode task (default) or enqueue a link.
+# Create an org-mode task (default), a reply task, or enqueue a link.
 
 use warnings;
 use strict;
@@ -8,19 +8,26 @@ use strict;
 use Email::Simple;
 use Getopt::Std;
 
-# Map a category to a capture template (to define the refile target)
-# and a string of tags
-my %CATEGORIES = (
-    personal => { template => 'mp', tags =>  '' },
-    birchbox => { template => 'mb', tags =>  '' });
+# Optionally map a category to a capture template, to define the
+# refile target
+my %CATEGORIES = ( personal => { task  => 'mp', reply => 'rp'},
+                   birchbox => { task  => 'mb', reply => 'rb'}
+    );
 
-our ($opt_c, $opt_l);
-getopts ('c:l');
+our ($opt_c, $opt_l, $opt_r);
+getopts ('c:lr');
 
-my $cat = $opt_c;
-my $do_link = $opt_l;
-my $org_template = $CATEGORIES{$cat}{template} || $CATEGORIES{personal}{template};
-my $org_tags = $CATEGORIES{$cat}{tags} || $CATEGORIES{personal}{tags};
+my $cat = $opt_c || 'personal';
+my $type;
+if ($opt_l) {
+    $type = 'link';
+} elsif ($opt_r) {
+    $type = 'reply'
+} else {
+    $type = 'task'
+}
+
+my $org_template = $CATEGORIES{$cat}{$type};
 
 my $msg;
 {
@@ -36,7 +43,8 @@ my $subject = clean_str_for_org_link($email->header('Subject'));
 my $from = clean_str_for_org_link($email->header('From'));
 
 my $org_protocol_uri;
-if ($do_link) {
+
+if ($type eq 'link') {
     $org_protocol_uri = sprintf(
         'org-protocol://store-link?url=message-id:%s&title=%s-%s',
         $message_id,
@@ -44,12 +52,11 @@ if ($do_link) {
         $subject);
 } else {
     $org_protocol_uri = sprintf(
-        'org-protocol://capture?template=%s&url=message-id:%s&title=%s-%s&body=%s',
+        'org-protocol://capture?template=%s&url=message-id:%s&title=%s-%s',
         $org_template,
         $message_id,
         $from,
-        $subject,
-        $org_tags);
+        $subject);
 }
 
 unless (system("emacsclient '$org_protocol_uri'") == 0) {

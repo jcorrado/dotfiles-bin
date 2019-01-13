@@ -12,5 +12,5 @@ fi
 
 maildir=$(mktemp -d)
 
-mu find -u --format=links --clearlinks --linksdir=$maildir "i:$msgid"
+mu find -ru --format=links --clearlinks --linksdir=$maildir "i:$msgid"
 xfce4-terminal --geometry=$WINDOW_POSITION --command="zsh -ic \"mutt -e 'set quit=yes' -f $maildir\""

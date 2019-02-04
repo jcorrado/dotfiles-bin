@@ -2,7 +2,7 @@
 
 set -e
 
-WINDOW_POSITION="113x32+2141+149"
+WINDOW_POSITION="124x33+1054+107"
 
 msgid="$1"
 if test -z $msgid; then

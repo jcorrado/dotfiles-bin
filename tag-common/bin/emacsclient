@@ -6,7 +6,15 @@ require 'socket'
 emacsclient = "/usr/local/bin/emacsclient"
 emacs_socket = "/home/jereme/.ssh/emacs-server"
 
-if (ENV.has_key?("SSH_CLIENT"))
+def ssh_running?
+  ENV.has_key?("SSH_CLIENT")
+end
+
+def tricky_args?
+  ARGV.any? { |i| i =~ /^-[ecF]$/ }
+end
+
+if (ssh_running? and not tricky_args?)
   file = Pathname.new(Dir.pwd) + ARGV.pop()
   args = ["-s", emacs_socket, *ARGV, "/scp:#{Socket.gethostname}:#{file.cleanpath}"]
 else

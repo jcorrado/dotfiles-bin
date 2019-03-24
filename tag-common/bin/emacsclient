@@ -1,0 +1,17 @@
+#!/usr/bin/env ruby
+
+require 'pathname'
+require 'socket'
+
+emacsclient = "/usr/local/bin/emacsclient"
+emacs_socket = "/home/jereme/.ssh/emacs-server"
+
+if (ENV.has_key?("SSH_CLIENT"))
+  filename = Pathname.new(Dir.pwd) + ARGV.pop()
+  cmd_args = ["-s", Socket.gethostname, *ARGV, "/scp:#{hostname}:#{filename.cleanpath}"]
+else
+  cmd_args = ARGV
+end
+
+system(emacsclient, *cmd_args) or
+  raise "failed to run emacsclient"

@@ -20,9 +20,9 @@ end
 system("emacsclient", org_protocol_uri) or
   raise "failed to run emacsclient"
 
-# Our "mp" and "mb" templates (see `org-capture-templates') allow for
+# Our "mp" and "mt" templates (see `org-capture-templates') allow for
 # populating some details, so we move focus over to Emacs.
-if template == "mp" or template == "mb"
+if template == "mp" or template == "mt"
   sleep(1.0/3)
   system("wmctrl", "-a", "CAPTURE-refile.org") or
     raise "failed to run wmctrl"

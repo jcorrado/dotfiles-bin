@@ -3,7 +3,7 @@
 require 'pathname'
 require 'socket'
 
-emacsclient = "/usr/local/bin/emacsclient"
+emacsclient = "/usr/bin/emacsclient"
 emacs_socket = "/home/jereme/.ssh/emacs-server"
 
 def ssh_running?

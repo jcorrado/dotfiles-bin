@@ -1,0 +1,14 @@
+#!/bin/bash
+
+ticket=$1
+
+if [ -z "$ticket" ]; then
+   echo please provide a ticket
+   exit 1
+fi
+
+if [[ "$ticket" =~ ^[0-9]+$ ]]; then
+    ticket="ENG-$ticket"
+fi
+
+google-chrome https://teammobot.atlassian.net/browse/$ticket

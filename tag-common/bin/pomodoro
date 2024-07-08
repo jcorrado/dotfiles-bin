@@ -80,7 +80,8 @@ for (my $i=0; $i < $MAX_ALERTS; $i++) {
     #     die "couldn't fork for alert: $!\n";
 
     if (fork()) {
-	if (system("xcowsay --time=0 --font \"Monospace Sans Bold 72\" --cow-size=large \"TIME IS UP 🍅\"") == 0) {
+        # \"TIME IS UP 🍅\"
+	if (system("xcowsay --image=$ENV{HOME}/.bin/tomato.png --time=0 --font \"Monospace Sans Bold 72\" --cow-size=large \"time is up\"") == 0) {
 	} else {
 	    die "couldn't fork for xcowsay: $!\n";
 	}
